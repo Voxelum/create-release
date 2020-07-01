@@ -5,7 +5,6 @@
   "main": "dist/index.js",
   "scripts": {
     "lint": "eslint 'src/**.js' 'tests/**.js' --fix",
-    "test": "eslint 'src/**.js' 'tests/**.js' && jest --coverage",
     "build": "ncc build src/main.js",
     "precommit": "npm run build && git add dist/"
   },
@@ -22,7 +21,8 @@
   "dependencies": {
     "@actions/core": "^1.0.0",
     "@actions/exec": "^1.0.0",
-    "@actions/github": "^2.2.0"
+    "@actions/github": "^2.2.0",
+    "file-type": "^14.6.2"
   },
   "devDependencies": {
     "@zeit/ncc": "^0.20.4",
