@@ -11296,15 +11296,30 @@ async function run() {
     const commitish = core.getInput('commitish', { required: false }) || context.sha;
     const assetPath = core.getInput('asset_dir_path', { required: true });
 
-    const getReleaseResponse = await github.repos.getReleaseByTag({ tag: tagName, owner, repo });
-
     let uploadUrl = '';
 
-    if (getReleaseResponse.status === 404) {
+    try {
+      const getReleaseResponse = await github.repos.getReleaseByTag({ tag: tagName, owner, repo });
+      const { data: { id: releaseId, html_url: htmlUrl, upload_url } } = getReleaseResponse;
+      await github.repos.updateRelease({
+        releaseId,
+        owner,
+        repo,
+        tag_name: tag,
+        name: releaseName,
+        body,
+        draft,
+        prerelease,
+        target_commitish: commitish
+      });
+
+      uploadUrl = upload_url;
+    } catch (e) {
       // Create a release
       // API Documentation: https://developer.github.com/v3/repos/releases/#create-a-release
       // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-create-release
-    const createReleaseResponse = await github.repos.createRelease({
+
+      const createReleaseResponse = await github.repos.createRelease({
         owner,
         repo,
         tag_name: tag,
@@ -11321,23 +11336,6 @@ async function run() {
       // } = createReleaseResponse;
 
       uploadUrl = createReleaseResponse.upload_url;
-
-      // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
-    } else {
-      const { data: { id: releaseId, html_url: htmlUrl, upload_url } } = getReleaseResponse;
-      await github.repos.updateRelease({
-        releaseId,
-        owner,
-        repo,
-        tag_name: tag,
-        name: releaseName,
-        body,
-        draft,
-        prerelease,
-        target_commitish: commitish
-      });
-
-      uploadUrl = upload_url;
     }
 
     if (fs.statSync(assetPath).isDirectory()) {
@@ -11355,7 +11353,7 @@ async function run() {
               ? fileType.mime
               : path.extname(asset)
                 ? `application/${path.extname(asset)}`
-              : 'text/plain',
+                : 'text/plain',
             'content-length': buff.length
           };
           await github.repos.uploadReleaseAsset({
