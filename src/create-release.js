@@ -15,6 +15,8 @@ async function run() {
     // Get owner and repo from context of payload that triggered the action
     const { owner, repo } = context.repo;
 
+    console.log(`Owner ${owner} and ${repo}`);
+
     // Get the inputs from the workflow file: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
     const tagName = core.getInput('tag_name', { required: true });
 
@@ -70,7 +72,6 @@ async function run() {
 
       uploadUrl = upload_url;
     }
-
 
     if (fs.statSync(assetPath).isDirectory()) {
       const assets = fs.readdirSync(assetPath);
