@@ -79,7 +79,7 @@ async function run() {
           if (fs.statSync(subAssetPath).isDirectory()) {
             return;
           }
-          const buff = readFile(subAssetPath);
+          const buff = await readFile(subAssetPath);
           const fileType = await ft.fromBuffer(buff);
           const headers = {
             'content-type': fileType
