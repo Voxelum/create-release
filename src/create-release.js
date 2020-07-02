@@ -33,7 +33,9 @@ async function run() {
 
     try {
       const getReleaseResponse = await github.repos.getReleaseByTag({ tag: tagName, owner, repo });
-      const { data: { id: releaseId, html_url: htmlUrl, upload_url } } = getReleaseResponse;
+      const {
+        data: { id: releaseId, html_url: htmlUrl, upload_url }
+      } = getReleaseResponse;
       await github.repos.updateRelease({
         releaseId,
         owner,
@@ -81,19 +83,21 @@ async function run() {
           }
           const buff = await readFile(subAssetPath);
           const fileType = await ft.fromBuffer(buff);
+          let contentType = 'text/plain';
+          if (fileType && fileType.mine) {
+            contentType = fileType.mime;
+          } else if (path.extname(asset)) {
+            contentType = `application/${path.extname(asset)}`;
+          }
           const headers = {
-            'content-type': fileType
-              ? fileType.mime
-              : path.extname(asset)
-                ? `application/${path.extname(asset)}`
-                : 'text/plain',
+            'content-type': contentType,
             'content-length': buff.length
           };
           await github.repos.uploadReleaseAsset({
             url: uploadUrl,
             headers,
             name: asset,
-            file: buff
+            data: buff
           });
         })
       );
