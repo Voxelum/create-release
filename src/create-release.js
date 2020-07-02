@@ -35,10 +35,11 @@ async function run() {
     const draftRelease = listReleaseResponse.data.find(r => r.draft);
 
     if (draftRelease) {
-      const { id: releaseId } = draftRelease;
+      console.log(`Found draft release!`);
+      console.log(JSON.stringify(draftRelease));
 
       await github.repos.updateRelease({
-        releaseId,
+        releaseId: draftRelease.id,
         owner,
         repo,
         tag_name: tag,
@@ -49,8 +50,6 @@ async function run() {
         target_commitish: commitish
       });
 
-      console.log(`Found draft release!`);
-      console.log(JSON.stringify(draftRelease));
       uploadUrl = draftRelease.upload_url;
     } else {
       // Create a release
@@ -97,6 +96,8 @@ async function run() {
               case '.exe':
               case '.deb':
               case '.AppImage':
+              case '.rpm':
+              case '.snap':
               case '.dmg':
               case '.pkg':
                 contentType = 'application/octet-stream';
