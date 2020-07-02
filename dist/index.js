@@ -11302,11 +11302,8 @@ async function run() {
     const draftRelease = listReleaseResponse.data.find(r => r.draft);
 
     if (draftRelease) {
-      console.log(`Found draft release!`);
-      console.log(JSON.stringify(draftRelease));
-
       await github.repos.updateRelease({
-        releaseId: draftRelease.id,
+        release_id: draftRelease.id,
         owner,
         repo,
         tag_name: tag,
@@ -11338,9 +11335,6 @@ async function run() {
       // const {
       //   data: { id: releaseId, html_url: htmlUrl, upload_url }
       // } = createReleaseResponse;
-
-      console.log(`Create new release!`);
-      console.log(JSON.stringify(createReleaseResponse));
 
       uploadUrl = createReleaseResponse.data.upload_url;
     }
