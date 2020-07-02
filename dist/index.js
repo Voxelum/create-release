@@ -11318,6 +11318,8 @@ async function run() {
         target_commitish: commitish
       });
 
+      console.log(`Found draft release!`);
+      console.log(JSON.stringify(draftRelease));
       uploadUrl = draftRelease.upload_url;
     } else {
       // Create a release
@@ -11340,7 +11342,10 @@ async function run() {
       //   data: { id: releaseId, html_url: htmlUrl, upload_url }
       // } = createReleaseResponse;
 
-      uploadUrl = createReleaseResponse.upload_url;
+      console.log(`Create new release!`);
+      console.log(JSON.stringify(createReleaseResponse));
+
+      uploadUrl = createReleaseResponse.data.upload_url;
     }
 
     if (fs.statSync(assetPath).isDirectory()) {
@@ -11356,8 +11361,27 @@ async function run() {
           let contentType = 'text/plain';
           if (fileType && fileType.mine) {
             contentType = fileType.mime;
-          } else if (path.extname(asset)) {
-            contentType = `application/${path.extname(asset)}`;
+          } else {
+            switch (path.extname(asset)) {
+              case '.exe':
+              case '.deb':
+              case '.AppImage':
+              case '.dmg':
+              case '.pkg':
+                contentType = 'application/octet-stream';
+                break;
+              case '.zip':
+                contentType = 'application/zip';
+                break;
+              case '.json':
+                contentType = 'application/json';
+                break;
+              case '.yml':
+              case '.yaml':
+                contentType = 'application/x-yaml';
+                break;
+              default:
+            }
           }
           const headers = {
             'content-type': contentType,
