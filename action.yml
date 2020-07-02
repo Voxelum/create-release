@@ -21,13 +21,6 @@ inputs:
   asset_dir_path:
     description: 'The aseets dir path to upload'
     required: true
-outputs:
-  id:
-    description: 'The ID of the created Release'
-  html_url:
-    description: 'The URL users can navigate to in order to view the release'
-  upload_url:
-    description: 'The URL for uploading assets to the release'
 runs:
   using: 'node12'
   main: 'dist/index.js'

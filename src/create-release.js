@@ -2,7 +2,6 @@ const core = require('@actions/core');
 const { GitHub, context } = require('@actions/github');
 const fs = require('fs');
 const path = require('path');
-const ft = require('file-type');
 const util = require('util');
 
 const readFile = util.promisify(fs.readFile);
@@ -14,8 +13,6 @@ async function run() {
 
     // Get owner and repo from context of payload that triggered the action
     const { owner, repo } = context.repo;
-
-    console.log(`Owner ${owner} and ${repo}`);
 
     // Get the inputs from the workflow file: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
     const tagName = core.getInput('tag_name', { required: true });
@@ -49,10 +46,6 @@ async function run() {
 
       uploadUrl = draftRelease.upload_url;
     } else {
-      // Create a release
-      // API Documentation: https://developer.github.com/v3/repos/releases/#create-a-release
-      // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-create-release
-
       const createReleaseResponse = await github.repos.createRelease({
         owner,
         repo,
@@ -63,11 +56,6 @@ async function run() {
         prerelease,
         target_commitish: commitish
       });
-
-      // Get the ID, html_url, and upload URL for the created Release from the response
-      // const {
-      //   data: { id: releaseId, html_url: htmlUrl, upload_url }
-      // } = createReleaseResponse;
 
       uploadUrl = createReleaseResponse.data.upload_url;
     }
@@ -81,39 +69,36 @@ async function run() {
             return;
           }
           const buff = await readFile(subAssetPath);
-          const fileType = await ft.fromBuffer(buff);
-          let contentType = 'text/plain';
-          if (fileType && fileType.mine) {
-            contentType = fileType.mime;
-          } else {
-            switch (path.extname(asset)) {
-              case '.exe':
-              case '.deb':
-              case '.AppImage':
-              case '.rpm':
-              case '.snap':
-              case '.dmg':
-              case '.pkg':
-                contentType = 'application/octet-stream';
-                break;
-              case '.zip':
-                contentType = 'application/zip';
-                break;
-              case '.json':
-                contentType = 'application/json';
-                break;
-              case '.yml':
-              case '.yaml':
-                contentType = 'application/x-yaml';
-                break;
-              default:
-            }
+          let contentType = '';
+          switch (path.extname(asset)) {
+            case '.exe':
+            case '.deb':
+            case '.AppImage':
+            case '.rpm':
+            case '.snap':
+            case '.dmg':
+            case '.pkg':
+            default:
+              contentType = 'application/octet-stream';
+              break;
+            case '.zip':
+              contentType = 'application/zip';
+              break;
+            case '.json':
+              contentType = 'application/json';
+              break;
+            case '.yml':
+            case '.yaml':
+              contentType = 'application/x-yaml';
+              break;
+            case '.txt':
+              contentType = 'text/plain';
+              break;
           }
           const headers = {
             'content-type': contentType,
             'content-length': buff.length
           };
-          console.log(`Upload ${uploadUrl}, file ${contentType} ${buff.length}, named ${asset}`);
           await github.repos.uploadReleaseAsset({
             url: uploadUrl,
             headers,
@@ -124,7 +109,6 @@ async function run() {
       );
     }
   } catch (error) {
-    console.error(error);
     core.setFailed(error.message);
   }
 }
