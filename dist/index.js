@@ -11360,6 +11360,7 @@ async function run() {
             'content-type': contentType,
             'content-length': buff.length
           };
+          console.log(`Upload ${uploadUrl}, file ${contentType} ${buff.length}, named ${asset}`);
           await github.repos.uploadReleaseAsset({
             url: uploadUrl,
             headers,
@@ -11370,6 +11371,7 @@ async function run() {
       );
     }
   } catch (error) {
+    console.error(error);
     core.setFailed(error.message);
   }
 }
