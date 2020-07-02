@@ -11302,9 +11302,7 @@ async function run() {
     const draftRelease = listReleaseResponse.data.find(r => r.draft);
 
     if (draftRelease) {
-      const {
-        data: { id: releaseId }
-      } = draftRelease;
+      const { id: releaseId } = draftRelease;
 
       await github.repos.updateRelease({
         releaseId,
