@@ -11291,18 +11291,21 @@ async function run() {
     const tag = tagName.replace('refs/tags/', '');
     const releaseName = core.getInput('release_name', { required: false }).replace('refs/tags/', '');
     const body = core.getInput('body', { required: false });
-    const draft = core.getInput('draft', { required: false }) === 'true';
+    const draft = true;
     const prerelease = core.getInput('prerelease', { required: false }) === 'true';
     const commitish = core.getInput('commitish', { required: false }) || context.sha;
     const assetPath = core.getInput('asset_dir_path', { required: true });
 
     let uploadUrl = '';
 
-    try {
-      const getReleaseResponse = await github.repos.getReleaseByTag({ tag: tagName, owner, repo });
+    const listReleaseResponse = await github.repos.listReleases({ owner, repo });
+    const draftRelease = listReleaseResponse.data.find(r => r.draft);
+
+    if (draftRelease) {
       const {
-        data: { id: releaseId, html_url: htmlUrl, upload_url }
-      } = getReleaseResponse;
+        data: { id: releaseId }
+      } = draftRelease;
+
       await github.repos.updateRelease({
         releaseId,
         owner,
@@ -11315,8 +11318,8 @@ async function run() {
         target_commitish: commitish
       });
 
-      uploadUrl = upload_url;
-    } catch (e) {
+      uploadUrl = draftRelease.upload_url;
+    } else {
       // Create a release
       // API Documentation: https://developer.github.com/v3/repos/releases/#create-a-release
       // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-create-release

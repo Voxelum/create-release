@@ -11,10 +11,6 @@ inputs:
   body:
     description: 'Text describing the contents of the tag.'
     required: false
-  draft:
-    description: '`true` to create a draft (unpublished) release, `false` to create a published one. Default: `false`'
-    required: false
-    default: false
   prerelease:
     description: '`true` to identify the release as a prerelease. `false` to identify the release as a full release. Default: `false`'
     required: false
