@@ -102,7 +102,7 @@ async function run() {
           await github.repos.uploadReleaseAsset({
             url: uploadUrl,
             headers,
-            name: asset,
+            name: asset.replace(' ', '-'),
             data: buff
           });
         })
