@@ -15,6 +15,10 @@ inputs:
     description: '`true` to identify the release as a prerelease. `false` to identify the release as a full release. Default: `false`'
     required: false
     default: false
+  draft:
+    description: '`true` to identify the release as a draft. Default: `false`'
+    required: false
+    default: false
   commitish:
     description: 'Any branch or commit SHA the Git tag is created from, unused if the Git tag already exists. Default: SHA of current commit'
     required: false
