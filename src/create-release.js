@@ -60,7 +60,7 @@ async function run() {
       uploadUrl = createReleaseResponse.data.upload_url;
     }
 
-    if (fs.statSync(assetPath).isDirectory()) {
+    if (assetPath && fs.statSync(assetPath).isDirectory()) {
       const assets = fs.readdirSync(assetPath);
       await Promise.all(
         assets.map(async asset => {
